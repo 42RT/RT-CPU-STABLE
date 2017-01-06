@@ -6,7 +6,7 @@
 #    By: rdieulan <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/06/24 13:16:13 by rdieulan          #+#    #+#              #
-#    Updated: 2017/01/06 14:39:49 by rfriscca         ###   ########.fr        #
+#    Updated: 2017/01/06 14:58:20 by rdieulan         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -69,8 +69,7 @@ linux:
 	make -C $(PATH_LIB)libft
 	make -C $(PATH_LIB)libvec
 	make -C $(PATH_LIB)minilibx
-	gcc $(FLAG) $(INCLUDE) -c $(SRC)
-	gcc -o $(NAME) $(SRCO) $(LIBFT) $(LIBVEC) $(MLX_LINUX) $(MLX_FLAG)
+	gcc -o $(NAME) $(SRCO) $(LIBFT) $(LIBVEC) $(MLX_LINUX) $(FLAG) $(MLX_FLAG)
 
 clean:
 	make -C $(PATH_LIB)libft clean

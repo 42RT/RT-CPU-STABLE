@@ -6,84 +6,111 @@
 #    By: rdieulan <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/06/24 13:16:13 by rdieulan          #+#    #+#              #
-#    Updated: 2017/01/06 14:58:20 by rdieulan         ###   ########.fr        #
+#    Updated: 2017/01/17 16:50:05 by rdieulan         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = RT
 
-PATH_SRC = srcs/
-PATH_LIB = lib/
+PATH_SRC =	srcs/
+PATH_LIB =	lib/
+UNAME_S =	$(shell uname -s)
 
-LIBFT = $(PATH_LIB)libft/libft.a
-LIBVEC = $(PATH_LIB)libvec/lib_vec.a
-MLX_OSX = $(PATH_LIB)minilibx_macos/libmlx.a
-MLX_LINUX = $(PATH_LIB)minilibx/libmlx.a
-SDL2 = $(PATH_LIB)SDL2/lib/libSDL2.a
+INCLUDES =	-I lib/libft/includes -I lib/libvec/include -I include
+CFLAGS =	-Wall -Werror -Wextra
+LDFLAGS =	-lm -L ./lib/libft -lft -L ./lib/libvec -l_vec
+FRAMEWORK =
 
-SRC = $(PATH_SRC)main.c\
-	  $(PATH_SRC)atof.c\
-	  $(PATH_SRC)calc_ncone.c\
-	  $(PATH_SRC)calc_ncylinder.c\
-	  $(PATH_SRC)camera.c\
-	  $(PATH_SRC)color_correction.c\
-	  $(PATH_SRC)color.c\
-	  $(PATH_SRC)cone.c\
-	  $(PATH_SRC)cylinder.c\
-	  $(PATH_SRC)default.c\
-	  $(PATH_SRC)error.c\
-	  $(PATH_SRC)event.c\
-	  $(PATH_SRC)ft_new_line.c\
-	  $(PATH_SRC)mlx_pixel_put_img.c\
-	  $(PATH_SRC)otherfunctions.c\
-	  $(PATH_SRC)parse_camera.c\
-	  $(PATH_SRC)parse_cone.c\
-	  $(PATH_SRC)parse_cylinder.c\
-	  $(PATH_SRC)parse_file.c\
-	  $(PATH_SRC)parse_plane.c\
-	  $(PATH_SRC)parse_sphere.c\
-	  $(PATH_SRC)parse_spot.c\
-	  $(PATH_SRC)plan.c\
-	  $(PATH_SRC)raycaster.c\
-	  $(PATH_SRC)save_file.c\
-	  $(PATH_SRC)sphere.c\
-	  $(PATH_SRC)spot.c\
-	  $(PATH_SRC)test_obj.c\
-	  $(PATH_SRC)test_spot.c\
-	  $(PATH_SRC)trace.c
+SRC =	$(PATH_SRC)main.c \
+		$(PATH_SRC)atof.c \
+		$(PATH_SRC)calc_ncone.c \
+		$(PATH_SRC)calc_ncylinder.c \
+		$(PATH_SRC)camera.c \
+		$(PATH_SRC)color_correction.c \
+		$(PATH_SRC)color.c \
+		$(PATH_SRC)cone.c \
+		$(PATH_SRC)cylinder.c \
+		$(PATH_SRC)default.c \
+		$(PATH_SRC)error.c \
+		$(PATH_SRC)event.c \
+		$(PATH_SRC)ft_new_line.c \
+		$(PATH_SRC)pixel_put.c \
+		$(PATH_SRC)otherfunctions.c \
+		$(PATH_SRC)old_parse_camera.c \
+		$(PATH_SRC)old_parse_cone.c \
+		$(PATH_SRC)old_parse_cylinder.c \
+		$(PATH_SRC)old_parse_file.c \
+		$(PATH_SRC)old_parse_plane.c \
+		$(PATH_SRC)old_parse_sphere.c \
+		$(PATH_SRC)old_parse_spot.c \
+		$(PATH_SRC)plan.c \
+		$(PATH_SRC)raycaster.c \
+		$(PATH_SRC)save_file.c \
+		$(PATH_SRC)sphere.c \
+		$(PATH_SRC)spot.c \
+		$(PATH_SRC)test_obj.c \
+		$(PATH_SRC)test_spot.c \
+		$(PATH_SRC)trace.c \
+		$(PATH_SRC)color_utils.c \
+		$(PATH_SRC)utils.c \
+		$(PATH_SRC)gui_error.c \
+		$(PATH_SRC)gui_background.c \
+		$(PATH_SRC)gui_container.c \
+		$(PATH_SRC)gui_button.c \
+		$(PATH_SRC)gui_textbox.c \
+		$(PATH_SRC)gui_main.c \
+		$(PATH_SRC)gui_ttf.c \
+		$(PATH_SRC)parse.c \
+		$(PATH_SRC)parse_settings.c \
+		$(PATH_SRC)parse_settings_utils.c \
+		$(PATH_SRC)parse_utils.c \
+		$(PATH_SRC)parse_utils_2.c \
+		$(PATH_SRC)parse_file.c \
+		$(PATH_SRC)parse_obj.c \
+		$(PATH_SRC)parse_obj_utils.c \
+		$(PATH_SRC)parse_light.c \
+		$(PATH_SRC)get_utils.c \
+		$(PATH_SRC)new_obj.c \
+		$(PATH_SRC)new_settings.c \
+		$(PATH_SRC)new_light.c \
+		$(PATH_SRC)compose.c \
+		$(PATH_SRC)create_plan_compose.c \
+		$(PATH_SRC)create_sphere_compose.c \
+		$(PATH_SRC)procedural_textures.c \
+		$(PATH_SRC)aff_settings.c
 
-SRCO = $(SRC:.c=.o)
+OBJ =	$(SRC:.c=.o)
 
-FLAG = -Wall -Werror -Wextra
-MLX_FLAG = -framework OpenGL -framework Appkit
+ifeq ($(UNAME_S),Darwin)
+	INCLUDES +=	-I ~/.brew/include/SDL2
+	LDFLAGS +=	-L ~/.brew/lib -lSDL2 -lSDL2_ttf
+else ifeq ($(UNAME_S),Linux)
+	LDFLAGS +=	-lSDL2 -lSDL2_ttf
+endif
+
+CFLAGS += $(INCLUDES)
 
 all: $(NAME)
 
-$(NAME): $(SRCO)
-	make -C $(PATH_LIB)libft
-	make -C $(PATH_LIB)libvec
-	make -C $(PATH_LIB)minilibx_macos
-	gcc -o $(NAME) $(SRCO) $(LIBFT) $(LIBVEC) $(MLX_OSX) $(FLAG) $(MLX_FLAG)
-
-linux:
-	make -C $(PATH_LIB)libft
-	make -C $(PATH_LIB)libvec
-	make -C $(PATH_LIB)minilibx
-	gcc -o $(NAME) $(SRCO) $(LIBFT) $(LIBVEC) $(MLX_LINUX) $(FLAG) $(MLX_FLAG)
+$(NAME): $(OBJ)
+	@make -C $(PATH_LIB)libft > /dev/null 2>&1
+	@make -C $(PATH_LIB)libvec > /dev/null 2>&1
+	@gcc $(CFLAGS) -o $(NAME) $(OBJ) $(LDFLAGS) $(FRAMEWORK)
+	@echo "\033[1;32m$(NAME) Compiled !\033[0m"
 
 clean:
-	make -C $(PATH_LIB)libft clean
-	make -C $(PATH_LIB)libvec clean
-	make -C $(PATH_LIB)minilibx_macos
-	make -C $(PATH_LIB)minilibx
-	rm -f $(SRCO)
+	@make -C $(PATH_LIB)libft clean > /dev/null 2>&1
+	@make -C $(PATH_LIB)libvec clean > /dev/null 2>&1
+	@rm -f $(OBJ)
+	@echo "\033[31mclean\033[0m"
 
-fclean: clean
-	make -C $(PATH_LIB)libft fclean
-	make -C $(PATH_LIB)libvec fclean
-	/bin/rm -f $(NAME)
+fclean:
+	@make -C $(PATH_LIB)libft fclean > /dev/null 2>&1
+	@make -C $(PATH_LIB)libvec fclean > /dev/null 2>&1
+	@rm -f $(OBJ)
+	@rm -f $(NAME)
+	@echo "\033[31mfclean\033[0m"
 
 re: fclean all
-re_linux : fclean linux
 
-.PHONY: all linux clean fclean re re_linux
+.PHONY: all clean fclean re

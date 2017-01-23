@@ -6,43 +6,65 @@
 /*   By: rfriscca <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/09/20 13:52:19 by rfriscca          #+#    #+#             */
-/*   Updated: 2017/01/06 13:50:34 by rfriscca         ###   ########.fr       */
+/*   Updated: 2017/01/17 14:18:34 by rdieulan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/rt.h"
+#include <rt.h>
+#include <parser.h>
 
-void		main_extension(t_env *env, int fd)
+t_env		*init_env(int fd)
 {
+	t_env *env;
+
+	if ((env = (t_env*)malloc(sizeof(t_env))) == NULL)
+			error(1);
 	env->file = save_file(fd);
 	env->obj = NULL;
 	env->spot = NULL;
-	parse_file(env);
+	env->win = NULL;
+	env->set = new_settings();
+	old_parse_file(env);
 	if (env->obj == NULL)
 		error(6);
 	if (env->spot == NULL)
 		error(4);
+	return (env);
+}
+
+void		init_graphics(t_env *env)
+{
+	if (SDL_Init(SDL_INIT_VIDEO) != 0)
+		error(7);
+	env->win = SDL_CreateWindow(env->set->name, ALT_SCREEN_CENTERED,
+			SDL_WINDOWPOS_CENTERED, env->set->width, env->set->height,
+			SDL_WINDOW_SHOWN);
+	if (env->win)
+		env->img = SDL_CreateRenderer(env->win, -1, SDL_RENDERER_ACCELERATED);
+	else
+		error(8);
 }
 
 int			main(int argc, char **argv)
 {
 	t_env		*env;
+	t_gui		*gui;
 	int			fd;
 
-	if ((env = (t_env*)malloc(sizeof(t_env))) == NULL)
-		error(1);
 	if (argc != 2)
 		error(2);
 	fd = open(argv[1], O_RDONLY);
-	main_extension(env, fd);
-	env->mlx = mlx_init();
-	env->img = mlx_new_image(env->mlx, WIDTH, HEIGHT);
-	env->img_data = mlx_get_data_addr(env->img, &env->bits_per_pixel,
-			&env->size_line, &env->endian);
+	env = init_env(fd);
+	parse(env, ".default.rtc");
+	init_graphics(env);
+	//aff_settings(env->set);
+	gui = gui_init();
 	raycaster(env);
-	env->win = mlx_new_window(env->mlx, WIDTH, HEIGHT, "RTv1");
-	mlx_key_hook(env->win, event, env);
-	mlx_put_image_to_window(env->mlx, env->win, env->img, 0, 0);
-	mlx_loop(env->mlx);
+	while (1)
+	{
+		SDL_WaitEvent(&env->event);
+		event(env->event, env);
+	}
+	(void)gui;
 	return (0);
 }

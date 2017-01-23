@@ -6,11 +6,11 @@
 /*   By: rfriscca <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/10/04 14:53:23 by rfriscca          #+#    #+#             */
-/*   Updated: 2017/01/06 14:06:56 by rfriscca         ###   ########.fr       */
+/*   Updated: 2017/01/17 14:39:45 by rdieulan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/rt.h"
+#include <rt.h>
 
 void	create_plan(t_env *env, t_vec pos, t_color color, t_vec n)
 {
@@ -25,8 +25,10 @@ void	create_plan(t_env *env, t_vec pos, t_color color, t_vec n)
 	obj->reflect = 0;
 	obj->d1 = 0;
 	obj->d2 = 0;
-	obj->color = color;
+	obj->color_t = color;
 	obj->next = NULL;
+	obj->textures = NULL;
+	obj->compose = NULL;
 	if (env->obj == NULL)
 	{
 		obj->first = obj;

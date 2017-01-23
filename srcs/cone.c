@@ -6,11 +6,11 @@
 /*   By: rfriscca <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/10/07 13:59:20 by rfriscca          #+#    #+#             */
-/*   Updated: 2017/01/06 13:56:53 by rfriscca         ###   ########.fr       */
+/*   Updated: 2017/01/17 14:39:34 by rdieulan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/rt.h"
+#include <rt.h>
 
 void	create_cone(t_env *env, t_parse data)
 {
@@ -25,8 +25,10 @@ void	create_cone(t_env *env, t_parse data)
 	obj->reflect = 0;
 	obj->d1 = 0;
 	obj->d2 = 0;
-	obj->color = data.color;
+	obj->color_t = data.color;
 	obj->next = NULL;
+	obj->textures = NULL;
+	obj->compose = NULL;
 	if (env->obj == NULL)
 	{
 		obj->first = obj;

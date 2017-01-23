@@ -6,11 +6,11 @@
 /*   By: rfriscca <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/09/27 15:15:57 by rfriscca          #+#    #+#             */
-/*   Updated: 2017/01/06 14:11:57 by rfriscca         ###   ########.fr       */
+/*   Updated: 2017/01/17 14:41:05 by rdieulan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/rt.h"
+#include <rt.h>
 
 int		lightcaster2(t_env *env, t_vec pos, t_ray ray)
 {
@@ -56,6 +56,7 @@ t_ray	init_lightray(t_env *env, t_vec vecdir, t_vec point)
 	t_ray		ray;
 
 	len = calc_vec(point, env->spot->spotpos);
+	ray.pos = point;
 	ray.vecdir = vecdir;
 	ray.dist = sqrt(len.x * len.x + len.y * len.y + len.z * len.z);
 	return (ray);
@@ -82,10 +83,12 @@ t_color	test_spot2(t_env *env, t_ray *ray, t_obj *obj, t_vec point)
 	vec_otol = normalize(calc_vec(point, env->spot->spotpos));
 	angle = dot(vec_otol, vec_ctoo);
 	env->spot->ray = init_lightray(env, vec_otol, point);
+	if (obj->textures != NULL && ft_strcmp(obj->textures, "stripes") == 0)
+		obj->color_t = stripe(point);
 	if (lightcaster(env, point, env->spot->ray, env->obj) == 0)
-		return (RCOLOR = calc_color(ray, obj->color, env->spot->color, angle));
+		return (RCOLOR = calc_color(ray, obj->color_t, env->spot->color, angle));
 	else
-		return (RCOLOR = calc_shadow(ray, obj->color));
+		return (RCOLOR = calc_shadow(ray, obj->color_t));
 }
 
 t_color	test_spot(t_env *env, t_ray *ray, t_obj *obj, t_vec point)

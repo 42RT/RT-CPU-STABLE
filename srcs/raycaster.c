@@ -6,11 +6,11 @@
 /*   By: rfriscca <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/09/20 14:22:46 by rfriscca          #+#    #+#             */
-/*   Updated: 2017/01/06 13:51:23 by rfriscca         ###   ########.fr       */
+/*   Updated: 2017/01/17 16:36:36 by rdieulan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/rt.h"
+#include <rt.h>
 
 t_color	init_color_black(void)
 {
@@ -46,24 +46,42 @@ t_ray	init_ray(t_env *env)
 
 void	raycaster(t_env *env)
 {
+
 	t_ray	*ray;
 	t_color	color;
+	int		cnt;
+	int		bar;
+	int		percent;
 
+	printf("RT : \033[33mSTART CALCULATING THE SCENE : \033[0m");
 	ray = (t_ray*)malloc(sizeof(t_ray));
 	color = init_color_black();
 	env->y = 0;
 	env->x = 0;
-	while (env->x < HEIGHT)
+	percent = 20;
+	cnt = 0;
+	bar = 0;
+	printf("\033[33m%d PIXEL ...\033[0m\n", env->set->height * env->set->width);
+	while (env->x < env->set->height)
 	{
-		while (env->y < WIDTH)
+		while (env->y < env->set->width)
 		{
 			*ray = init_ray(env);
 			color = trace(env, ray, 0);
-			mlx_pixel_put_img(env, color);
+			pixel_put(env, color);
 			++env->y;
+			cnt++;
+			if (cnt % (env->set->height * env->set->width * percent / 100) == 0)
+			{
+				bar++;
+				printf("RT : \033[1;32m%d\033[0m %%\n", percent * bar);
+			}
 		}
 		env->y = 0;
 		++env->x;
 	}
+	printf("RT : \033[33mApplying Render ... \033[0m: ");
+	SDL_RenderPresent(env->img);
+	printf("\033[1;32mDISPLAYED\033[0m\n");
 	free(ray);
 }

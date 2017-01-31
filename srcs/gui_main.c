@@ -20,6 +20,19 @@ t_gui		*get_gui(void)
 	return (&gui);
 }
 
+void		gui_main_refresh(t_gui *gui)
+{
+	//printf("Refreshing ...");
+	gui_background_get_set_n_display(gui);
+	gui_textbox_create_all(gui);
+	gui_button_create_all(gui);
+	gui_scroll_create_all(gui);
+	gui_font_build(gui);
+	if (PARAM && PARAM->active)
+		gui_param_refresh(gui);
+	//printf("Done\n");
+}
+
 void		gui_build(t_gui	*gui)
 {
 	printf("GUI : \033[33mBUILDING CONTENT ...\033[0m\n");
@@ -46,6 +59,9 @@ void		gui_build(t_gui	*gui)
 	printf("GUI : \033[33mButton \033[0m: ");
 	gui_button_build(gui);
 	printf("\033[1;32mOK\033[0m\n");
+	printf("GUI : \033[33mScroll \033[0m: ");
+	gui_scroll_build(gui);
+	printf("\033[1;32mOK\033[0m\n");
 	printf("GUI : \033[33mFont \033[0m: ");
 	gui_font_build(gui);
 	printf("\033[1;32mOK\033[0m\n");
@@ -60,6 +76,9 @@ void		gui_alloc(void)
 		error(1);
 	if ((gui->ttf = (t_ttf *)malloc(sizeof(t_ttf))) == NULL)
 		error(1);
+	HELP = NULL;
+	PARAM = NULL;
+	WIDGET = NULL;
 }
 
 t_gui		*gui_init(void)
@@ -87,11 +106,13 @@ t_gui		*gui_init(void)
 		gui->img = SDL_CreateRenderer(gui->win, -1, SDL_RENDERER_SOFTWARE);
 	else
 		gui_error(4);
+	gui->winID = SDL_GetWindowID(gui->win);
 	gui->tmp_lim = 0;
 	printf("GUI : \033[1;32mCOMPONENT INITIALIZED\033[0m\n\n");
 	gui_build(gui);
 	printf("GUI : \033[1;32mCONTENT BUILT\033[0m\n");
 	printf("GUI : \033[33mApplying Render...\033[0m : ");
+	//gui_anti_aliasing_set(0, 0, GUI_WIDTH, GUI_HEIGHT);
 	SDL_RenderPresent(gui->img);
 	printf("\033[1;32mDISPLAYED\033[0m\n\n");
 	return (gui);

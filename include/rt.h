@@ -90,19 +90,35 @@
 ** DEFINE GUI
 */
 
-# define GUI_WIDTH 400
-# define GUI_HEIGHT 640
+# define CONTAINER gui->container[id]
+# define BLOCK gui->container
+# define PATH gui->path
+# define BG gui->bg
+# define TTF gui->ttf
+# define BUTTON BLOCK[id]->button
+# define TEXTBOX BLOCK[id]->textbox
+# define SCROLL BLOCK[id]->scroll
+# define SCROLL_B SCROLL[i]->button
+# define CHECKBOX BLOCK[id]->checkbox
+# define ALT_SCREEN_CENTERED 2325
+# define SCANCODE event.key.keysym.scancode
+# define HELP gui->help
+# define PARAM gui->param
+# define PARAM_SCL PARAM->scroll[i]
+# define PARAM_SCL_B PARAM_SCL->button
+# define PARAM_CBX PARAM->checkbox[i]
+# define WIDGET gui->widget_active
+# define REF t_widget_ref
+# define DEF gui->def_widget
+
+# define GUI_WIDTH gui->dest.w
+# define GUI_HEIGHT gui->dest.h
 # define GUI_THEME 0
 # define GUI_AA 0
 # define GUI_DYNAMIC 1
 # define GUI_CONSTANT 0
-# define GUI_RESS_PATH "./ressources/"
-# define GUI_TEXTURE_PATH GUI_RESS_PATH"gui_texture/"
-# define GUI_FONT_PATH GUI_RESS_PATH"gui_font/"
-# define GUI_FONT_SIZE 18
-# define GUI_FONT_FILE "Starjedi"
-# define GUI_FONT_STYLE
 # define GUI_FONT_BORDER_STEP 15
+# define GUI_FONT_SIZE TTF->def_size
 # define GUI_ALIGN_LEFT 0
 # define GUI_ALIGN_MID 1
 # define GUI_ALIGN_RIGHT 2
@@ -129,21 +145,6 @@
 # define GUI_CONTAINER_RESERVED 640
 # define GUI_CONTAINER_RESIZED ((gui->height - \
 			GUI_CONTAINER_RESERVED) / GUI_CONTAINER_DYNAMIC_NB)
-# define CONTAINER gui->container[gui->cbcnt]
-# define BLOCK gui->container
-# define TTF gui->ttf
-# define BUTTON BLOCK[id]->button
-# define TEXTBOX BLOCK[id]->textbox
-# define SCROLL BLOCK[id]->scroll
-# define SCROLL_B SCROLL[i]->button
-# define ALT_SCREEN_CENTERED 2325
-# define SCANCODE event.key.keysym.scancode
-# define HELP gui->help
-# define PARAM gui->param
-# define PARAM_SCL PARAM->scroll[i]
-# define PARAM_SCL_B PARAM_SCL->button
-# define PARAM_CBX PARAM->checkbox[i]
-# define WIDGET gui->widget_active
 
 # include <math.h>
 # include <fcntl.h>
@@ -335,8 +336,16 @@ typedef enum
 					SCL,
 					PRM,
 					HLP,
-					CBX
+					CBX,
+					CNT
 }					widget_type;
+
+typedef struct		s_txt
+{
+	char			*content;
+	char			*anchor;
+	int				align;
+}					t_txt;
 
 typedef struct		s_ttf
 {
@@ -345,15 +354,20 @@ typedef struct		s_ttf
 	SDL_Rect		rect;
 	int				h_px;
 	int				w_px;
+	int				def_size;
+	char			*def_ttf;
+	int				def_border_step;
 }					t_ttf;
 
 typedef struct		s_checkbox
 {
 	widget_type		nature;
-	int				align;
 	SDL_Surface		*surface;
 	SDL_Texture		*bmp;
 	SDL_Rect		dest;
+	t_txt			*txt;
+	int				id;
+	int				p;
 	char			*tag;
 	bool			selected;
 }					t_checkbox;
@@ -361,58 +375,64 @@ typedef struct		s_checkbox
 typedef struct		s_button
 {
 	widget_type		nature;
-	int				align;
 	SDL_Surface		*surface;
 	SDL_Texture		*bmp;
 	SDL_Rect		dest;
+	t_txt			*txt;
+	int				id;
+	int				p;
 	char			*action;
 }					t_button;
 
 typedef struct		s_scroll
 {
 	widget_type		nature;
-	int				align;
 	SDL_Surface		*surface;
 	SDL_Texture		*bmp;
 	SDL_Rect		dest;
+	t_txt			*txt;
+	int				id;
+	int				p;
 	char			*tag;
 	t_button		*button;
 	char			**value;
 	int				nb_value;
 	int				active_value;
 	int				mod;
-	int				id;
-	int				p;
+
 }					t_scroll;
 
 typedef struct		s_textbox
 {
 	widget_type		nature;
-	int				align;
 	SDL_Surface		*surface;
 	SDL_Texture		*bmp;
 	SDL_Rect		dest;
-	char			*tag;
-	char			*value;
+	t_txt			*txt;
 	int				id;
 	int				p;
+	char			*tag;
+	char			*value;
 	int				vlen;
 	int				maxlen;
+	int				min;
+	int				max;
 	int				edited;
 }					t_textbox;
 
 typedef struct		s_container
 {
+	widget_type		nature;
+	SDL_Surface		*surface;
+	SDL_Texture		*bmp;
+	SDL_Rect		dest;
+	t_txt			*txt;
 	int				up_lim;
 	int				bot_lim;
-	int				px;
 	int				button_qt;
 	int				scroll_qt;
 	int				textbox_qt;
 	int				checkbox_qt;
-	SDL_Surface		*surface;
-	SDL_Texture		*bmp;
-	SDL_Rect		dest;
 	t_button		**button;
 	t_scroll		**scroll;
 	t_textbox		**textbox;
@@ -425,41 +445,91 @@ typedef struct		s_help
 	SDL_Surface		*surface;
 	SDL_Texture		*bmp;
 	SDL_Rect		dest;
+	int				active;
 }					t_help;
 
 typedef struct		s_param
 {
 	widget_type		nature;
-	int				active;
 	SDL_Surface		*surface;
 	SDL_Texture		*bmp;
 	SDL_Rect		dest;
+	t_button		**button;
 	t_scroll		**scroll;
+	t_textbox		**textbox;
 	t_checkbox		**checkbox;
+	int				button_qt;
 	int				scroll_qt;
+	int				textbox_qt;
 	int				checkbox_qt;
+	int				active;
 }					t_param;
+
+typedef struct		s_bg
+{
+	widget_type		nature;
+	SDL_Surface		*surface;
+	SDL_Texture		*bmp;
+	SDL_Rect		dest;
+}					t_bg;
+
+typedef struct		s_path
+{
+	char			*texture;
+	char			*font;
+}					t_path;
+
+typedef struct		s_widget_ref
+{
+	widget_type		nature;
+	SDL_Surface		*surface;
+	SDL_Texture		*bmp;
+	SDL_Rect		dest;
+	t_txt			*txt;
+	int				id;
+	int				p;
+}					t_widget_ref;
+
+typedef struct		s_def_widget
+{
+	int				txb_w;
+	int				txb_h;
+	char			*txb_texture;
+	char			*txb_texture_selected;
+	int				scl_w;
+	int				scl_h;
+	int				scl_max_shown;
+	char			*scl_texture_head;
+	char			*scl_texture_list;
+	char			*sclb_texture;
+	char			*sclb_texture_selected;
+	int				btn_w;
+	int				btn_h;
+	char			*btn_texture;
+	char			*btn_texture_selected;
+	int				cbx_size;
+	char			*cbx_texture;
+	char			*cbx_texture_selected;
+}					t_def_widget;
 
 typedef struct		s_gui
 {
 	SDL_Window		*win;
 	SDL_Renderer	*img;
-	int				winID;
+	unsigned int	winID;
 	SDL_Event		gui_event;
 	SDL_DisplayMode	*display;
-	SDL_Surface		*bg_surface;
-	SDL_Texture		*bg_bmp;
-	SDL_Rect		bg_dest;
+	SDL_Rect		dest;
 	SDL_Color		color;
 	t_color			p_color;
+	t_path			*path;
+	t_bg			*bg;
 	t_container		**container;
 	t_ttf			*ttf;
 	t_help			*help;
 	t_param			*param;
+	t_def_widget	*def_widget;
 	void			*widget_active;
-	int				cbcnt;
-	int				width;
-	int				height;
 	int				anchor_x;
 	int				anchor_y;
 	int				tmp_lim;
@@ -546,6 +616,10 @@ void				camangle(t_env *env, double rx, double ry, double rz);
 
 t_gui				*get_gui(void);
 t_gui				*gui_init(void);
+void				gui_parse_builder(t_gui *gui, char *file);
+void				gui_parse_param_builder(t_gui *gui, int fd, int nb);
+void				gui_parse_main_builder(t_gui *gui, int fd, int nb);
+void				gui_find_header(t_gui *gui, int fd, char *line);
 void				gui_pixel_put(t_gui *gui, int x, int y);
 SDL_Color			gui_color(char *choice);
 void				gui_background_get_set_n_display(t_gui *gui);
@@ -554,9 +628,13 @@ void				gui_error(int n);
 void				gui_font_init(t_gui *gui, char *ttf, int size);
 void				gui_font_build(t_gui *gui);
 void				gui_button_build(t_gui *gui);
+void				gui_button_set(t_button *button);
+void				gui_button_selected(t_gui *gui, t_button *button);
 void				gui_button_free(t_button *button);
 void				gui_textbox_build(t_gui *gui);
 void				gui_scroll_build(t_gui *gui);
+void				gui_textbox_get_len(t_textbox *textbox);
+void				gui_textbox_set(t_textbox *textbox);
 void				gui_textbox_get_bmp(t_gui *gui, t_textbox *textbox);
 void				gui_textbox_display(t_gui *gui, t_textbox *textbox);
 void				gui_write_textbox_value(t_gui *gui, t_textbox *textbox, char *color);
@@ -570,7 +648,11 @@ void				gui_button_create_all(t_gui *gui);
 void				gui_scroll_create_all(t_gui *gui);
 int					gui_scroll_value_select(t_gui *gui, SDL_Event event, t_scroll *scroll);
 void				gui_scroll_toggle(t_gui *gui, t_scroll *scroll);
+void				gui_scroll_set(t_scroll *scroll);
+void				gui_scroll_set_halign(t_scroll *scroll);
 void				gui_scroll_free(t_scroll *scroll);
+void				gui_scroll_write_list(t_gui *gui, t_scroll *scroll, int motion);
+void				gui_scroll_value_write(t_gui *gui, t_scroll *scroll, char *color);
 void				gui_help_toggle(t_gui *gui);
 void				gui_help_open(t_gui *gui);
 void				gui_help_close(t_gui *gui);
@@ -580,16 +662,21 @@ void				gui_param_toggle(t_gui *gui);
 void				gui_param_open(t_gui *gui);
 void				gui_param_close(t_gui *gui);
 void				gui_param_refresh(t_gui *gui);
-void				gui_param_checkbox_init(t_gui *gui, int nb);
-void				gui_param_checkbox_set(t_gui *gui, char *tag, int align, int y);
+t_scroll			*gui_param_scroll_init();
+void				gui_param_scroll_set(t_scroll *scroll);
+t_checkbox			*gui_param_checkbox_init(void);
+void				gui_param_checkbox_set(t_checkbox *checkbox);
 void				gui_param_checkbox_get_bmp(t_gui *gui, t_checkbox *checkbox, char *file);
 void				gui_param_checkbox_display(t_gui *gui, t_checkbox *checkbox);
 void				gui_param_checkbox_create_all(t_gui *gui);
-void				gui_widget_draw_depth(t_gui *gui, SDL_Rect widget, int px, char *color);
-void				gui_widget_draw_outline(t_gui *gui, SDL_Rect widget, int px, char *color);
-void				gui_widget_draw_inline(t_gui *gui, SDL_Rect widget, int in, char *color);
+void				gui_param_checkbox_toggle(t_gui *gui, t_checkbox *checkbox);
+void				gui_widget_draw_depth(SDL_Rect widget, int px, char *color);
+void				gui_widget_draw_outline(SDL_Rect widget, int px, char *color);
+void				gui_widget_draw_in_line(SDL_Rect widget, int in, char *color);
+void				gui_widget_texture_get_bmp(void *widget, char *file);
+void				gui_widget_display(void *widget);
+void				gui_widget_write_txt(void *widget, char *color);
 void				gui_anti_aliasing_set(int x, int y, int w, int h);
-
 /*
 ** OBJECTS FUNCTIONS
 */

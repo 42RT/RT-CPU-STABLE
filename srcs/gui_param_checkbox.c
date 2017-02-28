@@ -1,47 +1,42 @@
 #include <rt.h>
 
-void	gui_param_checkbox_init(t_gui *gui, int nb)
+t_checkbox	*gui_param_checkbox_init(void)
 {
-	int i;
+	t_checkbox	*checkbox;
 
-	printf("init param checkbox\n");
-	if ((PARAM->checkbox = (t_checkbox **)malloc(sizeof(t_checkbox *) * nb)) == NULL)
+	if ((checkbox = (t_checkbox *)malloc(sizeof(t_checkbox))) == NULL)
 		error(1);
-	PARAM->checkbox_qt = nb;
-	i = 0;
-	while (i < nb)
-	{
-		if ((PARAM_CBX = (t_checkbox *)malloc(sizeof(t_checkbox))) == NULL)
-			error(1);
-		PARAM_CBX->align = -1;
-		PARAM_CBX->selected = false;
-		PARAM_CBX->surface = NULL;
-		PARAM_CBX->bmp = NULL;
-		PARAM_CBX->nature = CBX;
-		i++;
-	}
-	
+	if ((checkbox->txt = (t_txt *)malloc(sizeof(t_txt))) == NULL)
+		error(1);
+	checkbox->surface = NULL;
+	checkbox->bmp = NULL;
+	checkbox->nature = CBX;
+	return (checkbox);
 }
 
-void	gui_param_checkbox_set(t_gui *gui, char *tag, int align, int y)
+void	gui_param_checkbox_set_halign(t_checkbox *checkbox)
 {
-	int	i;
+	t_gui *gui;
 
-	printf("setting param checkbox\n");
-	i = 0;
-	while (i < PARAM->checkbox_qt)
-	{
-		if (PARAM_CBX->align == -1)
-		{
-			PARAM_CBX->align = align;
-			PARAM_CBX->dest.w = GUI_CHECKBOX_SIZE;
-			PARAM_CBX->dest.h = GUI_CHECKBOX_SIZE;
-			PARAM_CBX->dest.y = y;
-			PARAM_CBX->tag = tag;
-			i = PARAM->checkbox_qt;
-		}
-		i++;
-	}
+	gui = get_gui();
+	if (checkbox->dest.x == GUI_ALIGN_LEFT)
+		checkbox->dest.x = PARAM->dest.x;
+	else if (checkbox->dest.x == GUI_ALIGN_MID)
+		checkbox->dest.x = (GUI_WIDTH / 2) - (checkbox->dest.w / 2);
+	else if (checkbox->dest.x == GUI_ALIGN_RIGHT)
+		checkbox->dest.x = GUI_WIDTH - checkbox->dest.w;
+	else
+		checkbox->dest.x = checkbox->dest.x;
+}
+
+void	gui_param_checkbox_set(t_checkbox *checkbox)
+{
+	t_gui	*gui;
+
+	gui = get_gui();
+	checkbox->dest.w = DEF->cbx_size;
+	checkbox->dest.h = DEF->cbx_size;
+	gui_param_checkbox_set_halign(checkbox);
 }
 
 void	gui_param_checkbox_create_all(t_gui *gui)
@@ -49,49 +44,24 @@ void	gui_param_checkbox_create_all(t_gui *gui)
 	int	i;
 
 	i = 0;
-	printf("creating param checkbox\n");
 	while (i < PARAM->checkbox_qt)
 	{
 		if (PARAM_CBX->selected)
 		{
-			gui_param_checkbox_get_bmp(gui, PARAM_CBX, "checkbox_selected.bmp");
-			gui_param_checkbox_display(gui, PARAM_CBX);
-			gui_widget_draw_in_line(gui, PARAM_CBX->dest, 3, "teal");
-			gui_widget_draw_in_line(gui, PARAM_CBX->dest, 1, "black");
+			gui_widget_texture_get_bmp(PARAM_CBX, "checkbox_selected.bmp");
+			gui_widget_display(PARAM_CBX);
+			gui_widget_draw_in_line(PARAM_CBX->dest, 3, "teal");
+			gui_widget_draw_in_line(PARAM_CBX->dest, 1, "black");
 		}
 		else
 		{
-			gui_param_checkbox_get_bmp(gui, PARAM_CBX, "textbox_white.bmp");
-			gui_param_checkbox_display(gui, PARAM_CBX);
-			gui_widget_draw_in_line(gui, PARAM_CBX->dest, 1, "black");
+			printf("%d %d %d %d\n", PARAM_CBX->dest.x, PARAM_CBX->dest.y, PARAM_CBX->dest.w, PARAM_CBX->dest.h);
+			gui_widget_texture_get_bmp(PARAM_CBX, "textbox_white.bmp");
+			gui_widget_display(PARAM_CBX);
+			gui_widget_draw_in_line(PARAM_CBX->dest, 1, "black");
 		}
 		i++;
 	}
-}
-
-void	gui_param_checkbox_get_bmp(t_gui *gui, t_checkbox *checkbox, char *file)
-{
-	checkbox->surface = SDL_LoadBMP(ft_strjoin(GUI_TEXTURE_PATH, file));
-	if (!checkbox->surface)
-		gui_error(2);
-	checkbox->bmp = SDL_CreateTextureFromSurface(gui->img, checkbox->surface);
-	if (!checkbox->bmp)
-		gui_error(3);
-}
-
-void	gui_param_checkbox_display(t_gui *gui, t_checkbox *checkbox)
-{
-	if (checkbox->align == GUI_ALIGN_LEFT)
-		checkbox->dest.x = PARAM->dest.x;
-	else if (checkbox->align == GUI_ALIGN_MID)
-		checkbox->dest.x = (GUI_WIDTH / 2) - (checkbox->dest.w / 2);
-	else if (checkbox->align == GUI_ALIGN_RIGHT)
-		checkbox->dest.x = GUI_WIDTH - checkbox->dest.w;
-	else
-		checkbox->dest.x = checkbox->align;
-	SDL_RenderCopy(gui->img, checkbox->bmp, NULL, &checkbox->dest);
-	SDL_DestroyTexture(checkbox->bmp);
-	SDL_FreeSurface(checkbox->surface);
 }
 
 void	gui_param_checkbox_enable(t_gui *gui, t_checkbox *checkbox)

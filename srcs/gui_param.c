@@ -1,101 +1,60 @@
 #include <rt.h>
 
-void	gui_param_free(t_param *param)
-{
-	int i;
-
-	i = 0;
-	while (i < param->scroll_qt)
-	{
-		gui_scroll_free(param->scroll[i]);
-		i++;
-	}
-	free(param);
-}
-
 void	gui_param_get_bmp_n_display(t_gui *gui)
 {
-	PARAM->surface = SDL_LoadBMP(GUI_TEXTURE_PATH"help_black.bmp");
-	if (!PARAM->surface)
-		gui_error(2);
-	PARAM->bmp = SDL_CreateTextureFromSurface(gui->img, PARAM->surface);
-	if (!PARAM->bmp)
-		gui_error(3);
+	gui_widget_texture_get_bmp(PARAM, "help_black.bmp");
 	SDL_SetTextureBlendMode(PARAM->bmp, SDL_BLENDMODE_BLEND);
 	SDL_SetTextureAlphaMod(PARAM->bmp, 240);
-	PARAM->dest.x = 20;
-	PARAM->dest.y = 20;
-	PARAM->dest.w = GUI_HELP_W;
-	PARAM->dest.h = GUI_HELP_H;
-	SDL_RenderCopy(gui->img, PARAM->bmp, NULL, &PARAM->dest);
-	SDL_DestroyTexture(PARAM->bmp);
-	SDL_FreeSurface(PARAM->surface);
-	gui_widget_draw_outline(gui, PARAM->dest, 5, "purple deep");
+	gui_widget_display(PARAM);
+	gui_widget_draw_outline(PARAM->dest, 5, "purple deep");
 	SDL_RenderPresent(gui->img);
 }
 
-void	gui_param_scroll_init(t_gui *gui, int nb)
+t_scroll	*gui_param_scroll_init()
 {
-	int i;
+	t_scroll	*scroll;
 
-	if ((PARAM->scroll = (t_scroll **)malloc(sizeof(t_scroll *) * nb)) == NULL)
+	if ((scroll = (t_scroll *)malloc(sizeof(t_scroll))) == NULL)
 		error(1);
-	PARAM->scroll_qt = nb;
-	PARAM->active = 0;
-	i = 0;
-	while (i < nb)
-	{
-		if ((PARAM_SCL = (t_scroll *)malloc(sizeof(t_scroll))) == NULL)
-			error(1);
-		if ((PARAM_SCL->value = (char **)malloc(sizeof(char *) * 6)) == NULL)
-			error(1);
-		if ((PARAM_SCL_B = (t_button *)malloc(sizeof(t_button))) == NULL)
-			error(1);
-		if ((PARAM_SCL->tag = (char *)malloc(sizeof(char) * 3)) == NULL)
-			error(1);
-		PARAM_SCL->value[0] = "param1";
-		PARAM_SCL->value[1] = "param2";
-		PARAM_SCL->value[2] = "param3";
-		PARAM_SCL->value[3] = "param4";
-		PARAM_SCL->value[4] = "param5";
-		PARAM_SCL->value[5] = "param6";
-		PARAM_SCL->active_value = 0;
-		PARAM_SCL->nb_value = 6;
-		PARAM_SCL->mod = 0;
-		PARAM_SCL->align = -1;
-		PARAM_SCL->nature = SCL;
-		PARAM_SCL->surface = NULL;
-		PARAM_SCL->bmp = NULL;
-		PARAM_SCL_B->surface = NULL;
-		PARAM_SCL_B->bmp = NULL;
-		PARAM_SCL_B->action = "scroll";
-		i++;
-	}
+	scroll->nb_value = 6;
+	if ((scroll->value = (char **)malloc(sizeof(char *) * scroll->nb_value))
+	== NULL)
+		error(1);
+	if ((scroll->button = (t_button *)malloc(sizeof(t_button))) == NULL)
+		error(1);
+	if ((scroll->tag = (char *)malloc(sizeof(char) * 3)) == NULL)
+		error(1);
+	if ((scroll->txt = (t_txt *)malloc(sizeof(t_txt))) == NULL)
+		error(1);
+	scroll->value[0] = "param1";
+	scroll->value[1] = "param2";
+	scroll->value[2] = "param3";
+	scroll->value[3] = "param4";
+	scroll->value[4] = "param5";
+	scroll->value[5] = "param6";
+	scroll->active_value = 0;
+	scroll->mod = 0;
+	scroll->nature = SCL;
+	scroll->surface = NULL;
+	scroll->bmp = NULL;
+	scroll->button->surface = NULL;
+	scroll->button->bmp = NULL;
+	scroll->button->action = "scroll";
+	return (scroll);
 }
 
-void	gui_param_scroll_set(t_gui *gui, char *tag, int align_v, int align_h)
+void	gui_param_scroll_set(t_scroll *scroll)
 {
-	int i;
+	t_gui	*gui;
 
-	i = 0;
-	while (i < PARAM->scroll_qt)
-	{
-		if (PARAM_SCL->align == -1)
-		{
-			PARAM_SCL->tag = tag;
-			PARAM_SCL->align = align_v;
-			PARAM_SCL->p = 0;
-			PARAM_SCL->id = i;
-			PARAM_SCL->dest.w = (GUI_WIDTH / 3);
-			PARAM_SCL->dest.h = GUI_SCROLL_H;
-			PARAM_SCL->dest.y = align_h;
-			PARAM_SCL_B->dest.y = PARAM_SCL->dest.y;
-			PARAM_SCL_B->dest.w = GUI_SCROLL_H;
-			PARAM_SCL_B->dest.h = GUI_SCROLL_H;
-			i = PARAM->scroll_qt;
-		}
-		i++;
-	}
+	gui = get_gui();
+	scroll->dest.w = DEF->scl_w;
+	scroll->dest.h = DEF->scl_h;
+	gui_scroll_set_halign(scroll);
+	scroll->button->dest.x = scroll->dest.x + scroll->dest.w;
+	scroll->button->dest.y = scroll->dest.y;
+	scroll->button->dest.w = DEF->scl_h;
+	scroll->button->dest.h = DEF->scl_h;
 }
 
 void	gui_param_scroll_create_all(t_gui *gui)
@@ -105,50 +64,74 @@ void	gui_param_scroll_create_all(t_gui *gui)
 	i = 0;
 	while (i < PARAM->scroll_qt)
 	{
-		gui_scroll_get_bmp(gui, PARAM_SCL, "textbox_white.bmp");
-		gui_scroll_display(gui, PARAM_SCL);
+		gui_widget_texture_get_bmp(PARAM_SCL, "textbox_white.bmp");
+		gui_widget_display(PARAM_SCL);
+		gui_widget_draw_in_line(PARAM_SCL->dest, 1, "black");
 		gui_scroll_value_write(gui, PARAM_SCL, "black");
-		PARAM_SCL_B->align = PARAM_SCL->dest.x + PARAM_SCL->dest.w;
-		gui_button_get_bmp(gui, PARAM_SCL_B, "scrollB_jade.bmp");
-		gui_button_display(gui, PARAM_SCL_B);
-		gui_widget_draw_in_line(gui, PARAM_SCL_B->dest, 1, "black");
+		gui_widget_texture_get_bmp(PARAM_SCL_B, "scrollB_jade.bmp");
+		gui_widget_display(PARAM_SCL_B);
+		gui_widget_draw_in_line(PARAM_SCL_B->dest, 1, "black");
 		i++;
 	}
 }
 
 void	gui_param_text_build(t_gui *gui)
 {
+	int i;
+
 	gui_font_init(gui, "Audiowide-Regular", GUI_FONT_SIZE + 1);
-	gui_write_param(gui, "options", GUI_ALIGN_MID, 20);
+	if (PARAM->button_qt > 0)
+	{
+		i = 0;
+		while (i < PARAM->button_qt)
+		{
+			gui_widget_write_txt(PARAM->button[i], "white");
+			i++;
+		}
+	}
+	if (PARAM->scroll_qt > 0)
+	{
+		i = 0;
+		while (i < PARAM->scroll_qt)
+		{
+			gui_widget_write_txt(PARAM->scroll[i], "white");
+			i++;
+		}
+	}
+	if (PARAM->textbox_qt > 0)
+	{
+		i = 0;
+		while (i < PARAM->textbox_qt)
+		{
+			gui_widget_write_txt(PARAM->textbox[i], "white");
+			i++;
+		}
+	}
+	if (PARAM->checkbox_qt > 0)
+	{
+		i = 0;
+		while (i < PARAM->checkbox_qt)
+		{
+			gui_widget_write_txt(PARAM->checkbox[i], "white");
+			i++;
+		}
+	}
+	/*gui_write_param(gui, "options", GUI_ALIGN_MID, 20);
 	gui_write_param(gui, "Resolution", GUI_ALIGN_LEFT, 45);
-	gui_write_param(gui, "Anti-aliasing", GUI_ALIGN_LEFT, 70);
+	gui_write_param(gui, "Anti-aliasing", GUI_ALIGN_LEFT, 70);*/
 	TTF_CloseFont(TTF->font);
 
 }
 
 void	gui_param_build(t_gui *gui)
 {
-	if (!PARAM->scroll)
-		gui_param_scroll_init(gui, 1);
-	if (!PARAM->checkbox)
-		gui_param_checkbox_init(gui, 1);
-	gui_param_scroll_set(gui, "RES", GUI_ALIGN_RIGHT, 45);
-	gui_param_checkbox_set(gui, "_AA", GUI_ALIGN_MID, 70);
 	gui_param_scroll_create_all(gui);
 	gui_param_checkbox_create_all(gui);
 	gui_param_text_build(gui);
-	}
+}
 
 void	gui_param_open(t_gui *gui)
 {
-	if (!PARAM)
-	{
-		if ((PARAM = (t_param *)malloc(sizeof(t_param))) == NULL)
-			error(1);
-		PARAM->scroll = NULL;
-		PARAM->checkbox = NULL;
-		PARAM->nature = PRM;
-	}
 	if (gui->widget_active)
 		event_widget_deselect(gui);
 	gui->widget_active = PARAM;
@@ -169,7 +152,7 @@ void	gui_param_close(t_gui *gui)
 
 void	gui_param_toggle(t_gui *gui)
 {
-	if (PARAM && PARAM->active)
+	if (WIDGET == PARAM)
 		gui_param_close(gui);
 	else
 		gui_param_open(gui);

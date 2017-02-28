@@ -17,7 +17,7 @@ PATH_LIB =	lib/
 UNAME_S =	$(shell uname -s)
 
 INCLUDES =	-I lib/libft/includes -I lib/libvec/include -I include
-CFLAGS =	#-Wall -Werror -Wextra
+CFLAGS =	-Wall -Werror -Wextra
 LDFLAGS =	-lm -L ./lib/libft -lft -L ./lib/libvec -l_vec
 FRAMEWORK =
 
@@ -54,6 +54,7 @@ SRC =	$(PATH_SRC)main.c \
 		$(PATH_SRC)color_utils.c \
 		$(PATH_SRC)utils.c \
 		$(PATH_SRC)gui_error.c \
+		$(PATH_SRC)gui_widget_tool.c \
 		$(PATH_SRC)gui_background.c \
 		$(PATH_SRC)gui_container.c \
 		$(PATH_SRC)gui_button.c \
@@ -65,6 +66,9 @@ SRC =	$(PATH_SRC)main.c \
 		$(PATH_SRC)gui_main.c \
 		$(PATH_SRC)gui_ttf.c \
 		$(PATH_SRC)gui_anti_aliasing.c \
+		$(PATH_SRC)gui_parse.c \
+		$(PATH_SRC)gui_parse_param.c \
+		$(PATH_SRC)gui_parse_main.c \
 		$(PATH_SRC)parse.c \
 		$(PATH_SRC)parse_settings.c \
 		$(PATH_SRC)parse_settings_utils.c \
